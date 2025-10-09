@@ -1,0 +1,9 @@
+﻿namespace Smart_Parking_System.Application.Dtos.ParkingArea
+{
+    public class UpdateParkingAreaDto
+    {
+        public string Name { get; set; } = default!;
+        public string Address { get; set; } = default!;
+        public int TotalSpots { get; set; }  
+    }
+}

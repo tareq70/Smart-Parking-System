@@ -16,5 +16,11 @@ namespace Smart_Parking_System.DomainLayer.Repositories
                                  .Include(a => a.Spots)
                                  .FirstOrDefaultAsync(a => a.Id == id);
         }
+
+        public async Task<ParkingArea?> GetByNameAsync(string name)
+        {
+            return await _context.ParkingAreas
+                                 .FirstOrDefaultAsync(a => a.Name == name);
+        }
     }
 }

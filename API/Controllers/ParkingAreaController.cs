@@ -17,16 +17,30 @@ namespace Smart_Parking_System.API.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
+        [HttpGet("GetAllParkingAreas")]
         public async Task<IActionResult> GetAllParkingAreas()
         {
             var areas = await _unitOfWork.ParkingAreas.GetAllAsync();
             return Ok(areas);
         }
-
-              
-        [HttpPost]
-        public async Task<IActionResult> AddArea(CreateParkingAreaDto dto)
+        [HttpGet("GetParkingAreaById")]
+        public async Task<IActionResult> GetParkingAreaById(Guid id)
+        {
+            var area= await _unitOfWork.ParkingAreas.GetByIdAsync(id);
+            if (area == null)
+                return NotFound("Parking area not found.");
+            return Ok(area);
+        }
+        [HttpGet("GetParkingAreaByName")]
+        public async Task<IActionResult> GetParkingAreaByName(string name)
+        {
+            var area = await _unitOfWork.ParkingAreas.GetByNameAsync(name);
+            if (area == null)
+                return NotFound("Parking area not found.");
+            return Ok(area);
+        }
+        [HttpPost("CreateParkingArea")]
+        public async Task<IActionResult> CreateParkingArea(CreateParkingAreaDto dto)
         {
             if (dto == null)
                 return BadRequest("Invalid data.");
@@ -45,5 +59,33 @@ namespace Smart_Parking_System.API.Controllers
 
             return Ok(area);
         }
+
+        [HttpPut("UpdateParkingArea")]
+        public async Task<IActionResult> UpdateParkingArea(Guid id, UpdateParkingAreaDto dto)
+        {
+            var area = await _unitOfWork.ParkingAreas.GetByIdAsync(id);
+            if (area == null)
+                return NotFound("Parking area not found.");
+            area.Name = dto.Name;
+            area.Address = dto.Address;
+            area.TotalSpots = dto.TotalSpots;
+            _unitOfWork.ParkingAreas.Update(area);
+            await _unitOfWork.CompleteAsync();
+            return Ok(area);
+        }
+
+
+        [HttpDelete("DeleteParkingArea")]
+        public async Task<IActionResult> DeleteParkingArea(Guid id)
+        {
+            var area = await _unitOfWork.ParkingAreas.GetByIdAsync(id);
+            if (area == null)
+                return NotFound("Parking area not found.");
+            _unitOfWork.ParkingAreas.Delete(area);
+            await _unitOfWork.CompleteAsync();
+            return Ok("Parking area deleted successfully.");
+        }
+
+
     }
 }
