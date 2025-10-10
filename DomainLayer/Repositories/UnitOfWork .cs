@@ -7,13 +7,16 @@ namespace Smart_Parking_System.DomainLayer.Repositories
     public class UnitOfWork : IUnitOfWork
     {    
         private readonly AppDbcontext _context;
-        public IParkingAreaRepository ParkingAreas { get; } = default!;
 
-        public UnitOfWork(AppDbcontext dbcontext, IParkingAreaRepository parkingAreas)
+        public IParkingAreaRepository ParkingAreas { get; } = default!;
+        public IParkingSpotRepository ParkingSpots { get; }
+
+        public UnitOfWork(AppDbcontext dbcontext, IParkingAreaRepository parkingAreas, IParkingSpotRepository parkingSpots)
         {
 
             _context = dbcontext ?? throw new ArgumentNullException(nameof(dbcontext));
             ParkingAreas = parkingAreas ?? throw new ArgumentNullException(nameof(parkingAreas));
+            ParkingSpots = parkingSpots ?? throw new ArgumentNullException(nameof(parkingSpots));
         }
 
 
