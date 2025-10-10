@@ -11,6 +11,7 @@ namespace Smart_Parking_System.Infrastructure.Data
         }
         public DbSet<ParkingArea> ParkingAreas { get; set; }
         public DbSet<ParkingSpot> ParkingSpots { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

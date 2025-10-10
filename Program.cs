@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbcontext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IParkingAreaRepository, ParkingAreaRepository>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 
 
 
