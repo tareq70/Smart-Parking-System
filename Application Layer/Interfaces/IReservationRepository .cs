@@ -8,9 +8,15 @@ namespace Smart_Parking_System.Application.Interfaces
     {
         Task<bool> HasConflictAsync(Guid spotId, DateTime startUtc, DateTime endUtc);
         Task<IEnumerable<Reservation>> GetActiveReservationsByAreaAsync(Guid areaId);
+        Task<Reservation?> GetActiveReservationBySpotIdAsync(Guid spotId);
         Task<IEnumerable<ReservationDto>> GetByUserIdAsync(Guid userId);
-
         Task<Reservation> CreateReservationAsync(Guid userId, CreateReservationDto dto);
+        Task AutoCompleteReservationsAsync();
+
+
+
+
+
 
 
 

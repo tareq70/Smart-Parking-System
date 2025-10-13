@@ -30,6 +30,28 @@ namespace Smart_Parking_System.API.Controllers
             return Ok(reservations);
         }
 
+
+        [HttpGet("GetReservationBySpotId")]
+        public async Task<IActionResult> GetReservationBySpotId(Guid spotId)
+        {
+            var reservation = await _unitOfWork.Reservations.GetActiveReservationBySpotIdAsync(spotId);
+            if (reservation == null)
+                return NotFound();
+            return Ok(reservation);
+        }
+
+
+        [HttpGet("GetReservationById")]
+        public async Task<IActionResult> GetReservationById(Guid reservationId)
+        {
+            var reservation = await _unitOfWork.Reservations.GetByIdAsync(reservationId);
+            if (reservation == null)
+                return NotFound();
+            return Ok(reservation);
+        }
+
+
+
         //User ID from token---------------
 
         [Authorize]
@@ -44,6 +66,7 @@ namespace Smart_Parking_System.API.Controllers
             return Ok(reservation);
         }
 
+
         [Authorize]
         [HttpGet("GetMyReservations")]
         public async Task<IActionResult> GetMyReservations()
@@ -55,27 +78,76 @@ namespace Smart_Parking_System.API.Controllers
             return Ok(reservations);
         }
 
-        [HttpGet("GetReservationById")]
-        public async Task<IActionResult> GetReservationById(Guid reservationId)
-        {
-            var reservation = await _unitOfWork.Reservations.GetByIdAsync(reservationId);
-            if (reservation == null)
-                return NotFound();
-            return Ok(reservation);
-        }
 
+        [Authorize]
         [HttpGet("CancelReservation")]
         public async Task<IActionResult> CancelReservation(Guid reservationId)
         {
+            //var reservation = await _unitOfWork.Reservations.GetByIdAsync(reservationId);
+            //if (reservation == null)
+            //    return NotFound();
+            //if (reservation.Status != ReservationStatus.Active)
+            //    return BadRequest("Only active reservations can be cancelled.");
+            //reservation.Status = ReservationStatus.Cancelled;
+            //await _unitOfWork.CompleteAsync();
+            //return Ok(reservation);
+
+            var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (UserId == null)
+                return Unauthorized();
+
             var reservation = await _unitOfWork.Reservations.GetByIdAsync(reservationId);
             if (reservation == null)
-                return NotFound();
+                return NotFound("Reservation not found");
+
+            if (reservation.UserId != Guid.Parse(UserId))
+                return Forbid("You can only cancel your own reservations.");
+
             if (reservation.Status != ReservationStatus.Active)
                 return BadRequest("Only active reservations can be cancelled.");
+
             reservation.Status = ReservationStatus.Cancelled;
+
+            var spot = await _unitOfWork.ParkingSpots.GetByIdAsync(reservation.ParkingSpotId);
+            if (spot != null)
+            {
+                spot.IsOccupied = false;
+                _unitOfWork.ParkingSpots.Update(spot);
+
+            }
+
+            _unitOfWork.Reservations.Update(reservation);
+
             await _unitOfWork.CompleteAsync();
             return Ok(reservation);
+
+
         }
+
+
+        //-------------------------------------------
+
+
+        [Authorize]
+        [HttpGet("GetUserReservationHistory")]
+        public async Task<IActionResult> GetUserReservationHistory()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdString == null)
+                return Unauthorized("User not authenticated.");
+
+            var userId = Guid.Parse(userIdString);
+
+            var reservations = await _unitOfWork.Reservations.GetByUserIdAsync(userId);
+            if (reservations == null ||!reservations.Any() || reservations.Count() == 0)
+                return NotFound("No reservation history found for this user.");
+
+            var History_Reservation = reservations.Where(r => r.Status == ReservationStatus.Completed || r.Status == ReservationStatus.Cancelled);
+            return Ok(History_Reservation);
+        }
+
+       
+
 
     }
 

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Smart_Parking_System.Application.Interfaces;
 using Smart_Parking_System.DomainLayer.Repositories;
 using Smart_Parking_System.Infrastructure.Data;
+using Smart_Parking_System.Infrastructure_Layer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IParkingAreaRepository, ParkingAreaRepository>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddHostedService<ReservationBackgroundService>();
 
 
 

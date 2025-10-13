@@ -25,6 +25,12 @@ namespace Smart_Parking_System.DomainLayer.Repositories
                 .Where(r => r.ParkingSpot.ParkingAreaId == areaId && r.Status == ReservationStatus.Active)
                 .ToListAsync();
         }
+        public async Task<Reservation?> GetActiveReservationBySpotIdAsync(Guid spotId)
+        {
+            return await _context.Reservations
+                .Where(r => r.ParkingSpotId == spotId && r.Status == ReservationStatus.Active)
+                .FirstOrDefaultAsync();
+        }
         public async Task<bool> HasConflictAsync(Guid spotId, DateTime startUtc, DateTime endUtc)
         {
             return await _context.Set<Reservation>()
@@ -86,6 +92,28 @@ namespace Smart_Parking_System.DomainLayer.Repositories
             await tx.CommitAsync();
 
             return reservation;
+        }
+
+        public async Task AutoCompleteReservationsAsync()
+        {
+            var now = DateTime.UtcNow;
+
+            var ExpiredReservations =await _context.Reservations
+                .Where(r => r.Status == ReservationStatus.Active && r.EndTimeUtc <= now)
+                .ToListAsync();
+            foreach (var reservation in ExpiredReservations)
+            {
+                reservation.Status = ReservationStatus.Completed;
+
+                if (reservation.ParkingSpot != null)
+                {
+                    reservation.ParkingSpot.IsReserved = false;
+                    _context.ParkingSpots.Update(reservation.ParkingSpot);
+                }
+                _context.Reservations.Update(reservation);
+
+            }
+            await _context.SaveChangesAsync();
         }
 
 
