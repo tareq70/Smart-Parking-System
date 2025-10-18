@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Smart_Parking_System.Domain_Layer.Entities;
 using Smart_Parking_System.DomainLayer.Entities;
 
 namespace Smart_Parking_System.Infrastructure.Data
 {
-    public class AppDbcontext : DbContext
+    public class AppDbcontext : IdentityDbContext<ApplicationUser>
     {
         public AppDbcontext(DbContextOptions<AppDbcontext> options) : base(options)
         {

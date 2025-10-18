@@ -58,6 +58,9 @@ namespace Smart_Parking_System.API.Controllers
         [HttpPost("CreateReservation")]
         public async Task<IActionResult> CreateReservation(CreateReservationDto dto)
         {
+            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(claims));
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
                 return Unauthorized();
