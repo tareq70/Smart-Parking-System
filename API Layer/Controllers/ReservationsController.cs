@@ -24,6 +24,7 @@ namespace Smart_Parking_System.API.Controllers
         }
 
         [HttpGet("GetAllActiveReservationsByAreaId")]
+        [Authorize("Admin")]
         public async Task<IActionResult> GetAllActiveReservations(Guid areaId)
         {
             var reservations = await _unitOfWork.Reservations.GetActiveReservationsByAreaAsync(areaId);
@@ -32,6 +33,7 @@ namespace Smart_Parking_System.API.Controllers
 
 
         [HttpGet("GetReservationBySpotId")]
+        [Authorize("Admin")]
         public async Task<IActionResult> GetReservationBySpotId(Guid spotId)
         {
             var reservation = await _unitOfWork.Reservations.GetActiveReservationBySpotIdAsync(spotId);
@@ -50,9 +52,6 @@ namespace Smart_Parking_System.API.Controllers
             return Ok(reservation);
         }
 
-
-
-        //User ID from token---------------
 
         [Authorize]
         [HttpPost("CreateReservation")]
@@ -83,7 +82,7 @@ namespace Smart_Parking_System.API.Controllers
 
 
         [Authorize]
-        [HttpGet("CancelReservation")]
+        [HttpPut("CancelReservation")]
         public async Task<IActionResult> CancelReservation(Guid reservationId)
         {
             //var reservation = await _unitOfWork.Reservations.GetByIdAsync(reservationId);
@@ -128,7 +127,20 @@ namespace Smart_Parking_System.API.Controllers
         }
 
 
-        //-------------------------------------------
+        [Authorize]
+        [HttpGet("GetActiveReservation")]
+        public async Task<IActionResult> GetActiveReservation()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdString == null)
+                return Unauthorized("User not authenticated.");
+
+            var userId = Guid.Parse(userIdString);
+            var reservation = await _unitOfWork.Reservations.GetActiveReservationByUserIdAsync(userId);
+            if (reservation == null)
+                return NotFound("No active reservation found for this user.");
+            return Ok(reservation);
+        }
 
 
         [Authorize]
@@ -142,19 +154,13 @@ namespace Smart_Parking_System.API.Controllers
             var userId = Guid.Parse(userIdString);
 
             var reservations = await _unitOfWork.Reservations.GetByUserIdAsync(userId);
-            if (reservations == null ||!reservations.Any() || reservations.Count() == 0)
+            if (reservations == null || !reservations.Any() || reservations.Count() == 0)
                 return NotFound("No reservation history found for this user.");
 
             var History_Reservation = reservations.Where(r => r.Status == ReservationStatus.Completed || r.Status == ReservationStatus.Cancelled);
             return Ok(History_Reservation);
         }
 
-       
-
 
     }
-
-
-
-
 }

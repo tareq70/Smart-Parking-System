@@ -44,6 +44,12 @@ namespace Smart_Parking_System.DomainLayer.Repositories
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
         }
+        public async Task<IEnumerable<ReservationDto>> GetActiveReservationByUserIdAsync(Guid userId)
+        {
+            return await _context.Set<ReservationDto>()
+                .Where(r => r.UserId == userId && r.Status == ReservationStatus.Active).ToListAsync();
+                
+        }
 
         public async Task<Reservation> CreateReservationAsync(Guid userId, CreateReservationDto dto)
         {
@@ -116,6 +122,6 @@ namespace Smart_Parking_System.DomainLayer.Repositories
             await _context.SaveChangesAsync();
         }
 
-
+      
     }
 }
