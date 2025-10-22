@@ -1,20 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Smart_Parking_System.Application.Interfaces;
+using Smart_Parking_System.Application.Repositories;
+using Smart_Parking_System.Application_Layer.Interfaces;
+using Smart_Parking_System.Domain_Layer.Entities;
+using Smart_Parking_System.Domain_Layer.Repositories;
 using Smart_Parking_System.DomainLayer.Repositories;
 using Smart_Parking_System.Infrastructure.Data;
 using Smart_Parking_System.Infrastructure_Layer.Services;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using System;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,10 +27,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("connectionString")));
 
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IParkingAreaRepository, ParkingAreaRepository>();
 builder.Services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
 builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IAuthenticationServices, AuthenticationServices>();
 builder.Services.AddHostedService<ReservationBackgroundService>();
 builder.Services.AddSwaggerGen(Options =>
 {
@@ -40,61 +47,61 @@ builder.Services.AddSwaggerGen(Options =>
     Options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
-        new OpenApiSecurityScheme
-        {
-            Reference = new OpenApiReference
+            new OpenApiSecurityScheme
             {
-                Type = ReferenceType.SecurityScheme,
-                Id ="Bearer"
-            }
+              Reference = new OpenApiReference
+              {
+                  Type = ReferenceType.SecurityScheme,
+                  Id ="Bearer"
+              }
 
-        },
-        new string [] {}
+            },
+           new string [] {}
 
-    }
+        }
     });
 
 });
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+})
+        .AddEntityFrameworkStores<AppDbcontext>()
+        .AddDefaultTokenProviders();
+
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSection["Key"]);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSection["Issuer"],
+        ValidAudience = jwtSection["Audience"],
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 
-
-#region Keycloak Authentication
-
-//builder.Services.AddScoped<KeycloakService>();
-
-//// Add Keycloak authentication
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    var keycloak = builder.Configuration.GetSection("Keycloak");
-//    options.Authority = keycloak["Authority"];
-//    options.MetadataAddress = keycloak["MetadataAddress"];
-//    options.RequireHttpsMetadata = false;
-//    options.Audience = keycloak["ClientId"];
-
-
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateAudience = true,
-//        ValidateIssuer = true,
-
-//        NameClaimType = "sub",
-//        RoleClaimType = "roles"
-
-//    };
-//}); 
-#endregion 
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -104,7 +111,7 @@ if (app.Environment.IsDevelopment())
         {
             DefaultModelsExpandDepth = -1
         };
-        options.DocumentTitle = "Hall Managment System";
+        options.DocumentTitle = "Smart Parking System ";
         options.DocExpansion(DocExpansion.None);
         options.EnableFilter();
         options.EnablePersistAuthorization();

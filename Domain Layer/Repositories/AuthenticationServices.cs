@@ -19,53 +19,98 @@ namespace Smart_Parking_System.Domain_Layer.Repositories
         private readonly IConfiguration _configuration;
         private readonly AppDbcontext dbContext;
 
-        public AuthenticationServices(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, AppDbContext dbContext)
+        public AuthenticationServices(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, AppDbcontext dbContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             this.dbContext = dbContext;
         }
-        public async Task<string> LoginUserAsync(LoginDTO login)
+        public async Task<ResponseDTO> LoginUserAsync(LoginDTO login)
         {
-           var user = await _userManager.FindByNameAsync(login.Username);
+            var user = await _userManager.FindByEmailAsync(login.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, login.Password))
             {
-                return "Invalid username or password";  
+                return new ResponseDTO
+                {
+                    Success = false,
+                    Message = "Invalid username or password"
+                };
             }
+
             var roles = await _userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault() ?? "User"; 
-            return GenerateJwtToken(user, role);
+            var role = roles.FirstOrDefault() ?? "User";
+
+            var token = GenerateJwtToken(user, role);
+
+            return new ResponseDTO
+            {
+                Success = true,
+                Token = token,
+                Message = "User logged in successfully."
+            };
         }
 
-        public Task<string> RegisterUserAsync(RegisterDTO register)
+
+        public async Task<ResponseDTO> RegisterUserAsync(RegisterDTO register)
         {
+            if (register.Password != register.ConfirmPassword)
+                return new ResponseDTO
+                {
+                    Success = false,
+                    Message = "Passwords do not match."
+                };
+
+            var existingUserByUsername = await _userManager.FindByNameAsync(register.Username);
+            if (existingUserByUsername != null)
+                return new ResponseDTO
+                {
+                    Success = false,
+                    Message = "Username already exists."
+                };
+
+            var existingUserByEmail = await _userManager.FindByEmailAsync(register.Email);
+            if (existingUserByEmail != null)
+                return new ResponseDTO
+                {
+                    Success = false,
+                    Message = "Email already exists."
+                };
+
             var user = new ApplicationUser
             {
+                FullName = register.FullName,
                 UserName = register.Username,
-                Email = register.Email
+                Email = register.Email,
+                PhoneNumber = register.PhoneNumber,
+                SSN = register.SSN
             };
-            return Task.Run(async () =>
-            {
-                var existingUser = await _userManager.FindByNameAsync(register.Username);
-                if (existingUser != null)
-                {
-                    return "Username already exists";
-                }
-                var result = await _userManager.CreateAsync(user, register.Password);
-                if (!result.Succeeded)
-                {
-                    return string.Join(", ", result.Errors.Select(e => e.Description));
-                }
-                if (!await _roleManager.RoleExistsAsync("User"))
-                {
-                    await _roleManager.CreateAsync(new IdentityRole("User"));
-                }
-                await _userManager.AddToRoleAsync(user, "User");
-                return GenerateJwtToken(user, "User");
-            });
 
+            var result = await _userManager.CreateAsync(user, register.Password);
+            if (!result.Succeeded)
+                return new ResponseDTO
+                {
+                    Success = false,
+                    Message = string.Join("; ", result.Errors.Select(e => e.Description))
+                };
+
+            if (!await _roleManager.RoleExistsAsync("User"))
+            {
+                await _roleManager.CreateAsync(new IdentityRole("User"));
+            }
+
+            await _userManager.AddToRoleAsync(user, "User");
+
+            var token = GenerateJwtToken(user, "User");
+
+            return new ResponseDTO
+            {
+                Success = true,
+                Token = token,
+                Message = "User registered successfully."
+            };
         }
+
 
         private string GenerateJwtToken(ApplicationUser user, string role)
         {

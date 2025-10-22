@@ -4,8 +4,8 @@ namespace Smart_Parking_System.Application_Layer.Interfaces
 {
     public interface IAuthenticationServices
     {
-        Task<string> RegisterUserAsync(RegisterDTO register);
-        Task<string> LoginUserAsync(LoginDTO login);
+        Task<ResponseDTO> RegisterUserAsync(RegisterDTO register);
+        Task<ResponseDTO> LoginUserAsync(LoginDTO login);
 
     }
 }

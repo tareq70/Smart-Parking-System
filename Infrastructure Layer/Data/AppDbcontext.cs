@@ -11,6 +11,8 @@ namespace Smart_Parking_System.Infrastructure.Data
         {
 
         }
+
+        
         public DbSet<ParkingArea> ParkingAreas { get; set; }
         public DbSet<ParkingSpot> ParkingSpots { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
@@ -24,6 +26,7 @@ namespace Smart_Parking_System.Infrastructure.Data
             .HasMany(a => a.Spots)
             .WithOne(s => s.ParkingArea)
             .HasForeignKey(s => s.ParkingAreaId);
+            base.OnModelCreating(modelBuilder);
 
         }
 

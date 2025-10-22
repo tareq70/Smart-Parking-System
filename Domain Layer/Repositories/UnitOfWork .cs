@@ -1,4 +1,5 @@
 ﻿using Smart_Parking_System.Application.Interfaces;
+using Smart_Parking_System.Application_Layer.Interfaces;
 using Smart_Parking_System.DomainLayer.Entities;
 using Smart_Parking_System.Infrastructure.Data;
 
@@ -11,14 +12,17 @@ namespace Smart_Parking_System.DomainLayer.Repositories
         public IParkingAreaRepository ParkingAreas { get; }
         public IParkingSpotRepository ParkingSpots { get; }
         public IReservationRepository Reservations { get; }
+        public IAuthenticationServices AuthenticationServices { get; }
 
-        public UnitOfWork(AppDbcontext dbcontext, IParkingAreaRepository parkingAreas, IParkingSpotRepository parkingSpots, IReservationRepository reservations)
+
+        public UnitOfWork(AppDbcontext dbcontext, IParkingAreaRepository parkingAreas, IParkingSpotRepository parkingSpots, IReservationRepository reservations, IAuthenticationServices Authservices)
         {
 
             _context = dbcontext ?? throw new ArgumentNullException(nameof(dbcontext));
             ParkingAreas = parkingAreas ?? throw new ArgumentNullException(nameof(parkingAreas));
             ParkingSpots = parkingSpots ?? throw new ArgumentNullException(nameof(parkingSpots));
             Reservations = reservations ?? throw new ArgumentNullException(nameof(reservations));
+            AuthenticationServices = Authservices;
         }
 
 
