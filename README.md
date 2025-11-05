@@ -1,22 +1,22 @@
 # 🚗 SMART PARKING SYSTEM API
-# ASP.NET Core Web API + Clean Architecture + Unit of Work + JWT + Social Login + Email Confirmation + Excel Export
+**ASP.NET Core Web API + Clean Architecture + Unit of Work + JWT + Social Login + Email Confirmation + Excel Export**
 
 # ------------------------------------------------------------
-# 📋 TABLE OF CONTENTS
+## Table of Contents
 # ------------------------------------------------------------
-# 1. Features
-# 2. System Architecture
-# 3. Tech Stack
-# 4. Project Structure
-# 5. Database Design
-# 6. Authentication
-# 7. Email Notifications
-# 8. Reservation Flow
-# 9. Unit of Work + Repository
-# 10. Export to Excel
-# 11. Setup Instructions
-# 12. Future Enhancements
-# 13. Author
+- [Features](#-features)
+- [System Architecture](#-system-architecture)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Database Design](#-database-design)
+- [Authentication](#-authentication)
+- [Email Notifications](#-email-notifications)
+- [Reservation Flow](#-reservation-flow)
+- [Unit of Work + Repository](#-unit-of-work--repository)
+- [Export to Excel](#-export-to-excel)
+- [Setup Instructions](#-setup-instructions)
+- [Future Enhancements](#-future-enhancements)
+- [Author](#-author)
 # ------------------------------------------------------------
 
 # 🚀 FEATURES
