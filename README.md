@@ -36,23 +36,23 @@
 # PROJECT STRUCTURE
 # ------------------------------------------------------------
 .
-├── Application/
-│   ├── Dtos/
-│   ├── Enums/
-│   ├── Interfaces/
-│   └── Services/
-├── DomainLayer/
-│   ├── Entities/
-│   └── Repositories/
-├── Infrastructure/
-│   ├── Data/
-│   ├── Repositories/
-│   └── Services/   # EmailService, SocialAuthService
-├── WebAPI/
-│   ├── Controllers/
-│   ├── Middleware/
-│   └── Program.cs
-└── README.md
+#├── Application/
+#│   ├── Dtos/
+#│   ├── Enums/
+#│   ├── Interfaces/
+#│   └── Services/
+#├── DomainLayer/
+#│   ├── Entities/
+#│   └── Repositories/
+#├── Infrastructure/
+#│   ├── Data/
+#│   ├── Repositories/
+#│   └── Services/   # EmailService, SocialAuthService
+#├── WebAPI/
+#│   ├── Controllers/
+#│   ├── Middleware/
+#│   └── Program.cs
+#└── README.md
 
 # ------------------------------------------------------------
 # SETUP
